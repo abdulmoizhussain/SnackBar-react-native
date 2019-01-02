@@ -1,11 +1,5 @@
 import React, { Component } from "react";
 import { StyleSheet, Text, Animated } from "react-native";
-// required:
-// autoHideDuration
-// default:
-// color
-// text
-// undo/hide text
 class SnackBar extends Component {
   constructor() {
     super();
@@ -14,29 +8,40 @@ class SnackBar extends Component {
     this.ShowSnackBar = false;
     this.HideSnackBar = true;
     this.state = {
-      SnackBarInsideMsgHolder: "",
-      UndoMessage: ""
+      snackBarText: "",
+      snackBarTextColor: "#fff",
+      backgroundColor: "#009688",
+      undoText: "",
+      undoTextColor: "#FFEB3B",
+      autoHideDuration: ""
     };
   }
 
   ShowSnackBarFunction(
-    SnackBarInsideMsgHolder = "Default SnackBar Message...",
-    UndoMessage = "UNDO",
-    duration = 5000
+    snackBarText = "Default SnackBar Message!",
+    snackBarTextColor = "#fff",
+    backgroundColor = "#009688",
+    undoText = "UNDO",
+    undoTextColor = "#FFEB3B",
+    autoHideDuration = 5000
   ) {
     if (this.ShowSnackBar === false) {
-      this.setState({ SnackBarInsideMsgHolder, UndoMessage });
-
+      this.setState({
+        snackBarText,
+        snackBarTextColor,
+        backgroundColor,
+        undoText,
+        undoTextColor
+      });
       this.ShowSnackBar = true;
-
       Animated.timing(this.animatedValue, {
         toValue: 0,
-        duration: 400 // pop-up animation duration
-      }).start(this.HideSnackBarFunction(duration));
+        duration: 400 // pop-up animation time
+      }).start(this.HideSnackBarFunction(autoHideDuration));
     }
   }
 
-  HideSnackBarFunction = (hidingAnimationDuration = 0) => {
+  HideSnackBarFunction = (autoHideDuration = 0) => {
     // kept zero to hide to it asap if time is not provided
     this.timerID = setTimeout(() => {
       if (this.HideSnackBar === true) {
@@ -51,7 +56,7 @@ class SnackBar extends Component {
           clearTimeout(this.timerID);
         });
       }
-    }, hidingAnimationDuration);
+    }, autoHideDuration);
   };
 
   SnackBarCloseFunction = () => {
@@ -69,22 +74,39 @@ class SnackBar extends Component {
   };
 
   render() {
+    const {
+      snackBarText,
+      snackBarTextColor,
+      backgroundColor,
+      undoText,
+      undoTextColor
+    } = this.state;
+
     return (
       <Animated.View
         style={[
           { transform: [{ translateY: this.animatedValue }] },
-          styles.SnackBarContainter
+          { backgroundColor, ...styles.SnackBarContainter }
         ]}
       >
-        <Text numberOfLines={1} style={styles.SnackBarMessage}>
-          {this.state.SnackBarInsideMsgHolder}
+        <Text
+          numberOfLines={1}
+          style={{
+            color: snackBarTextColor,
+            ...styles.SnackBarMessage
+          }}
+        >
+          {snackBarText}
         </Text>
 
         <Text
-          style={styles.SnackBarUndoText}
+          style={{
+            color: undoTextColor,
+            ...styles.SnackBarUndoText
+          }}
           onPress={this.SnackBarCloseFunction}
         >
-          {this.state.UndoMessage}
+          {undoText}
         </Text>
       </Animated.View>
     );
@@ -96,7 +118,6 @@ export default SnackBar;
 const styles = StyleSheet.create({
   SnackBarContainter: {
     position: "absolute",
-    backgroundColor: "#009688",
     flexDirection: "row",
     alignItems: "center",
     left: 0,
@@ -108,12 +129,10 @@ const styles = StyleSheet.create({
   },
 
   SnackBarMessage: {
-    color: "#fff",
     fontSize: 18
   },
 
   SnackBarUndoText: {
-    color: "#FFEB3B",
     fontSize: 18,
     position: "absolute",
     right: 10,
